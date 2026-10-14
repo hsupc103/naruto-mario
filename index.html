@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark only" />
+  <title>NARUTO × MARIO：火影鳴人忍界大冒險 (REA Reverse-Engineered Edition)</title>
+  <script>
+    if (location.protocol.startsWith("http") && location.pathname.endsWith("/naruto-mario")) {
+      location.replace(location.pathname + "/" + location.search + location.hash);
+    }
+  </script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top HUD -->
+    <header class="hud-top">
+      <div class="hud-card player-card">
+        <div class="avatar-ring" id="hudAvatarRing">
+          <canvas id="hudAvatarCanvas" width="72" height="72"></canvas>
+        </div>
+        <div class="player-info">
+          <div class="player-title-row">
+            <span class="badge-tag" id="hudFormBadge">普通鳴人 (Q版)</span>
+            <span class="lives-tag" id="hudLives">❤️ × 3</span>
+          </div>
+          <div class="player-hp-row">
+            <div class="player-hp-track">
+              <div class="player-hp-lag" id="hudHpLag" style="width: 100%"></div>
+              <div class="player-hp-fill" id="hudHpFill" style="width: 100%"></div>
+              <span class="player-hp-text" id="hudHpText">HP 100 / 100</span>
+            </div>
+          </div>
+          <div class="stat-row">
+            <span>🪙 忍幣: <strong id="hudCoins">0</strong></span>
+            <span>🔥 連擊: <strong id="hudCombo">0</strong></span>
+            <span>🏆 分數: <strong id="hudScore">0</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Abilities & 3-Second Charge HUD -->
+      <div class="hud-card abilities-card">
+        <div class="ability-slot" id="slotRasengan">
+          <div class="ability-icon rasengan-icon">🌀</div>
+          <div class="ability-detail">
+            <div class="ability-name">螺旋丸光彈 <kbd>J</kbd>/<kbd>Z</kbd></div>
+            <div class="ability-state" id="hudRasenganState">未解鎖 (請撞擊 ? 方塊吃香菇)</div>
+          </div>
+        </div>
+
+        <div class="ability-divider"></div>
+
+        <div class="ability-slot clickable-slot" id="slotKurama" title="點擊或按 K / X 立即開始 3 秒集氣發射尾獸彈">
+          <div class="ability-icon kurama-icon">🦊</div>
+          <div class="ability-detail">
+            <div class="ability-name">
+              九尾化・尾獸彈 <kbd>K</kbd>/<kbd>X</kbd> 集氣3秒發射
+              <span class="kurama-timer" id="hudKuramaTimer"></span>
+            </div>
+            <div class="bijuudama-row">
+              <div class="orb-slots" id="hudBijuudamaOrbs">
+                <span class="orb empty"></span>
+                <span class="orb empty"></span>
+                <span class="orb empty"></span>
+              </div>
+              <div class="charge-bar-wrap">
+                <div class="charge-bar-fill" id="hudChargeFill"></div>
+                <span class="charge-bar-text" id="hudChargeText">集氣 0.0s / 3.0s (需無敵星星)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage & 2-Minute Boss Progression -->
+      <div class="hud-card stage-card">
+        <div class="stage-header">
+          <span class="stage-name" id="hudStageName">STAGE 1：木葉森林與終末之谷</span>
+          <span class="stage-timer" id="hudStageTimer">⏱️ 00:00 / 預計 02:00 遇 Boss</span>
+        </div>
+        <div class="stage-progress-track">
+          <div class="stage-progress-fill" id="hudStageProgress"></div>
+          <span class="zone-dot" style="left: 25%" title="區域 2：忍橋高台"></span>
+          <span class="zone-dot" style="left: 50%" title="區域 3：菁英埋伏區"></span>
+          <span class="zone-dot" style="left: 75%" title="區域 4：終末結界前哨"></span>
+          <span class="boss-marker" style="left: 94%" title="頭目 Boss 決戰區">👹</span>
+        </div>
+        <div class="stage-subinfo" id="hudStageSubinfo">
+          距離關卡 Boss 尚有 <strong id="hudBossDist">100%</strong> 路程 ｜ 依敵人強度需 1~5 發螺旋丸
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Game Viewport -->
+    <main class="viewport-wrap">
+      <canvas id="gameCanvas" width="1280" height="660" tabindex="0"></canvas>
+
+      <!-- Boss HP Overlay -->
+      <div class="boss-hud hidden" id="bossHud">
+        <div class="boss-hud-header">
+          <div class="boss-title-group">
+            <span class="boss-warning-tag">WARNING // 關卡頭目決戰</span>
+            <h2 id="bossName">桃地再不斬・霧隱鬼人</h2>
+          </div>
+          <div class="boss-hp-numbers">
+            HP <span id="bossHpCurrent">300</span> / <span id="bossHpMax">300</span>
+            <small id="bossHintText">(尾獸彈需 2~3 發擊破 / 螺旋丸連續打擊)</small>
+          </div>
+        </div>
+        <div class="boss-hp-track">
+          <div class="boss-hp-damage-lag" id="bossHpLag"></div>
+          <div class="boss-hp-fill" id="bossHpFill"></div>
+        </div>
+      </div>
+
+      <!-- Center Banner Notification -->
+      <div class="center-banner hidden" id="centerBanner">
+        <div class="banner-subtitle" id="bannerSubtitle">STAGE START</div>
+        <div class="banner-title" id="bannerTitle">STAGE 1：木葉森林與終末之谷</div>
+        <div class="banner-desc" id="bannerDesc">吃下查克拉香菇發射「螺旋丸光彈」・吃下無敵星星變身「九尾鳴人」集氣3秒發射「尾獸彈」！</div>
+      </div>
+    </main>
+
+    <!-- Interactive Controls & REA Inspector Bar -->
+    <footer class="hud-bottom">
+      <div class="controls-guide">
+        <span><kbd>A</kbd><kbd>D</kbd> / <kbd>◀</kbd><kbd>▶</kbd> 移動</span>
+        <span><kbd>W</kbd> / <kbd>Space</kbd> / <kbd>▲</kbd> 二段忍躍</span>
+        <span><kbd>J</kbd> / <kbd>Z</kbd> 發射螺旋丸 (吃香菇後)</span>
+        <span><kbd>按 K</kbd> / <kbd>X</kbd> 集氣 3.0 秒發射尾獸彈 (九尾模式限3顆)</span>
+      </div>
+
+      <div class="quick-actions">
+        <button type="button" class="action-btn btn-mushroom" id="btnGiveMushroom" title="立即測試吃到香菇效果">🍄 吃香菇 (螺旋丸)</button>
+        <button type="button" class="action-btn btn-star" id="btnGiveStar" title="立即測試吃到無敵星星變身九尾+3顆尾獸彈">⭐ 吃無敵星星 (九尾化+尾獸彈×3)</button>
+        <button type="button" class="action-btn btn-bijuudama" id="btnFireBijuudama" title="集氣 3 秒發射超大玉尾獸彈 (全畫面清場 / 重創頭目)">💥 發射尾獸彈 (K/X)</button>
+        <button type="button" class="action-btn btn-warp" id="btnWarpMid" title="傳送至關卡中段 (約1分鐘處)">⛩️ 中繼點</button>
+        <button type="button" class="action-btn btn-boss" id="btnWarpBoss" title="直接傳送至本關 Boss 決戰前">👹 直達 Boss</button>
+        <button type="button" class="action-btn btn-stage" id="btnStage1">第 1 關</button>
+        <button type="button" class="action-btn btn-stage" id="btnStage2">第 2 關</button>
+        <button type="button" class="action-btn btn-stage" id="btnStage3">第 3 關</button>
+        <button type="button" class="action-btn btn-audio" id="btnToggleAudio">🔊 音效: 開</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="./js/audio.js"></script>
+  <script src="./js/levels.js"></script>
+  <script src="./js/renderer.js"></script>
+  <script src="./js/engine.js"></script>
+</body>
+</html>
