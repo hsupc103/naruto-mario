@@ -43,6 +43,7 @@ class NarutoMarioEngine {
     this.combo = 0;
     this.lives = 3;
 
+    this.syncViewportOrientation();
     this.initStage(0);
     this.bindEvents();
     this.lastTimestamp = performance.now();
@@ -53,6 +54,18 @@ class NarutoMarioEngine {
     this.syncTelemetry();
 
     requestAnimationFrame((ts) => this.loop(ts));
+  }
+
+  syncViewportOrientation() {
+    if (!this.canvas) return;
+    const isPortraitMobile = window.innerHeight > window.innerWidth && window.innerWidth <= 920;
+    const targetW = isPortraitMobile ? 820 : 1280;
+    const targetH = 660;
+    if (this.canvas.width !== targetW || this.canvas.height !== targetH) {
+      this.canvas.width = targetW;
+      this.canvas.height = targetH;
+    }
+    document.body.dataset.orientation = isPortraitMobile ? "portrait" : "landscape";
   }
 
   initStage(stageIdx) {
@@ -290,6 +303,158 @@ class NarutoMarioEngine {
       const on = window.NinjaAudio.toggle();
       audioBtn.textContent = on ? "🔊 音效: 開" : "🔇 音效: 關";
     });
+
+    const gamepadBtn = document.getElementById("btnToggleGamepad");
+    gamepadBtn?.addEventListener("click", (ev) => {
+      refocusCanvas(ev);
+      document.body.classList.toggle("show-gamepad");
+    });
+
+    // Dynamic Portrait / Landscape orientation adaptation
+    window.addEventListener("resize", () => this.syncViewportOrientation());
+    window.addEventListener("orientationchange", () => {
+      setTimeout(() => this.syncViewportOrientation(), 80);
+    });
+
+    // Mobile Multi-Touch & Pointer Gamepad Controls (Portrait & Landscape)
+    const btnLeft = document.getElementById("touchLeft");
+    const btnRight = document.getElementById("touchRight");
+    const dpadZone = document.getElementById("touchDpadZone");
+    const btnJump = document.getElementById("touchJump");
+    const btnShoot = document.getElementById("touchShoot");
+    const btnBijuudama = document.getElementById("touchBijuudama");
+
+    const updateDpadState = (leftActive, rightActive) => {
+      this.keys.left = leftActive;
+      this.keys.right = rightActive;
+      btnLeft?.classList.toggle("pressed", leftActive);
+      btnRight?.classList.toggle("pressed", rightActive);
+    };
+
+    const handleDpadTouches = (e) => {
+      if (e.cancelable) e.preventDefault();
+      if (window.NinjaAudio) window.NinjaAudio.ensureContext();
+      let leftHit = false;
+      let rightHit = false;
+      for (let i = 0; i < e.touches.length; i++) {
+        const t = e.touches[i];
+        const el = document.elementFromPoint(t.clientX, t.clientY)?.closest(".touch-dir");
+        if (el && el.dataset.dir === "left") leftHit = true;
+        if (el && el.dataset.dir === "right") rightHit = true;
+      }
+      updateDpadState(leftHit, rightHit);
+    };
+
+    if (dpadZone) {
+      dpadZone.addEventListener("touchstart", handleDpadTouches, { passive: false });
+      dpadZone.addEventListener("touchmove", handleDpadTouches, { passive: false });
+      dpadZone.addEventListener("touchend", handleDpadTouches, { passive: false });
+      dpadZone.addEventListener("touchcancel", handleDpadTouches, { passive: false });
+    }
+
+    // Pointer fallback for mouse / desktop testing on D-pad buttons
+    [
+      { btn: btnLeft, dir: "left" },
+      { btn: btnRight, dir: "right" }
+    ].forEach(({ btn, dir }) => {
+      if (!btn) return;
+      btn.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "touch") return;
+        e.preventDefault();
+        if (window.NinjaAudio) window.NinjaAudio.ensureContext();
+        updateDpadState(dir === "left", dir === "right");
+      });
+      const releaseDir = (e) => {
+        if (e.pointerType === "touch") return;
+        updateDpadState(false, false);
+      };
+      btn.addEventListener("pointerup", releaseDir);
+      btn.addEventListener("pointerleave", releaseDir);
+      btn.addEventListener("pointercancel", releaseDir);
+    });
+
+    // Jump Button (Supports Double Ninja Jump)
+    if (btnJump) {
+      const pressJump = (e) => {
+        if (e.cancelable) e.preventDefault();
+        if (window.NinjaAudio) window.NinjaAudio.ensureContext();
+        if (!this.keys.jump) this.jumpPressedJustNow = true;
+        this.keys.jump = true;
+        btnJump.classList.add("pressed");
+      };
+      const releaseJump = (e) => {
+        if (e.cancelable) e.preventDefault();
+        this.keys.jump = false;
+        btnJump.classList.remove("pressed");
+      };
+      btnJump.addEventListener("touchstart", pressJump, { passive: false });
+      btnJump.addEventListener("touchend", releaseJump, { passive: false });
+      btnJump.addEventListener("touchcancel", releaseJump, { passive: false });
+      btnJump.addEventListener("pointerdown", (e) => {
+        if (e.pointerType !== "touch") pressJump(e);
+      });
+      btnJump.addEventListener("pointerup", (e) => {
+        if (e.pointerType !== "touch") releaseJump(e);
+      });
+      btnJump.addEventListener("pointerleave", (e) => {
+        if (e.pointerType !== "touch") releaseJump(e);
+      });
+    }
+
+    // Rasengan Shoot Button
+    if (btnShoot) {
+      const pressShoot = (e) => {
+        if (e.cancelable) e.preventDefault();
+        if (window.NinjaAudio) window.NinjaAudio.ensureContext();
+        this.shootPressedJustNow = true;
+        this.keys.shoot = true;
+        btnShoot.classList.add("pressed");
+      };
+      const releaseShoot = (e) => {
+        if (e.cancelable) e.preventDefault();
+        this.keys.shoot = false;
+        this.shootHoldDuration = 0;
+        btnShoot.classList.remove("pressed");
+      };
+      btnShoot.addEventListener("touchstart", pressShoot, { passive: false });
+      btnShoot.addEventListener("touchend", releaseShoot, { passive: false });
+      btnShoot.addEventListener("touchcancel", releaseShoot, { passive: false });
+      btnShoot.addEventListener("pointerdown", (e) => {
+        if (e.pointerType !== "touch") pressShoot(e);
+      });
+      btnShoot.addEventListener("pointerup", (e) => {
+        if (e.pointerType !== "touch") releaseShoot(e);
+      });
+      btnShoot.addEventListener("pointerleave", (e) => {
+        if (e.pointerType !== "touch") releaseShoot(e);
+      });
+    }
+
+    // Bijuudama 3-Second Charge & Fire Button
+    if (btnBijuudama) {
+      const pressBijuudama = (e) => {
+        if (e.cancelable) e.preventDefault();
+        if (window.NinjaAudio) window.NinjaAudio.ensureContext();
+        btnBijuudama.classList.add("pressed");
+        this.triggerBijuudamaCharge(false);
+      };
+      const releaseBijuudama = (e) => {
+        if (e.cancelable) e.preventDefault();
+        btnBijuudama.classList.remove("pressed");
+      };
+      btnBijuudama.addEventListener("touchstart", pressBijuudama, { passive: false });
+      btnBijuudama.addEventListener("touchend", releaseBijuudama, { passive: false });
+      btnBijuudama.addEventListener("touchcancel", releaseBijuudama, { passive: false });
+      btnBijuudama.addEventListener("pointerdown", (e) => {
+        if (e.pointerType !== "touch") pressBijuudama(e);
+      });
+      btnBijuudama.addEventListener("pointerup", (e) => {
+        if (e.pointerType !== "touch") releaseBijuudama(e);
+      });
+      btnBijuudama.addEventListener("pointerleave", (e) => {
+        if (e.pointerType !== "touch") releaseBijuudama(e);
+      });
+    }
   }
 
   showBanner(subtitle, title, desc, durationSec = 3.0) {
@@ -1289,11 +1454,19 @@ class NarutoMarioEngine {
 
   updateCamera() {
     const def = this.world.def;
+    const leadOffset = Math.min(360, Math.round(this.canvas.width * 0.3));
     if (this.camera.lockedInArena) {
-      const targetX = def.bossArenaStartX - 30;
-      this.camera.x += (targetX - this.camera.x) * 0.12;
+      if (this.canvas.width >= 1060) {
+        const targetX = def.bossArenaStartX - 30;
+        this.camera.x += (targetX - this.camera.x) * 0.12;
+      } else {
+        const minArenaCam = def.bossArenaStartX - 20;
+        const maxArenaCam = Math.max(minArenaCam, def.bossArenaEndX - this.canvas.width + 20);
+        const targetX = Math.max(minArenaCam, Math.min(maxArenaCam, this.player.x - leadOffset));
+        this.camera.x += (targetX - this.camera.x) * 0.14;
+      }
     } else {
-      const targetX = Math.max(0, Math.min(def.lengthPx - this.canvas.width, this.player.x - 360));
+      const targetX = Math.max(0, Math.min(def.lengthPx - this.canvas.width, this.player.x - leadOffset));
       this.camera.x += (targetX - this.camera.x) * 0.14;
     }
   }

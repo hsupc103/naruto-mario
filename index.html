@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="color-scheme" content="dark only" />
   <title>NARUTO × MARIO：火影鳴人忍界大冒險 (REA Reverse-Engineered Edition)</title>
   <script>
@@ -123,6 +123,39 @@
       </div>
     </main>
 
+    <!-- Mobile & Touch Gamepad (Portrait Console Deck & Landscape Floating Overlay) -->
+    <section class="mobile-gamepad" id="mobileGamepad" aria-label="手機觸控方向與忍術手把">
+      <div class="touch-dpad" id="touchDpadZone">
+        <button type="button" class="touch-btn touch-dir" id="touchLeft" data-dir="left" aria-label="向左移動">
+          <span class="touch-glyph">◀</span>
+          <span class="touch-label">左移</span>
+        </button>
+        <button type="button" class="touch-btn touch-dir" id="touchRight" data-dir="right" aria-label="向右移動">
+          <span class="touch-glyph">▶</span>
+          <span class="touch-label">右移</span>
+        </button>
+      </div>
+
+      <div class="touch-center-hint">
+        <span>📱 直向／橫向雙模式觸控手把</span>
+      </div>
+
+      <div class="touch-actions">
+        <button type="button" class="touch-btn touch-bijuudama" id="touchBijuudama" aria-label="集氣3秒發射尾獸彈">
+          <span class="touch-glyph">🦊</span>
+          <span class="touch-label">尾獸彈</span>
+        </button>
+        <button type="button" class="touch-btn touch-rasengan" id="touchShoot" aria-label="直線發射螺旋丸">
+          <span class="touch-glyph">🌀</span>
+          <span class="touch-label">螺旋丸</span>
+        </button>
+        <button type="button" class="touch-btn touch-jump" id="touchJump" aria-label="二段忍躍跳躍">
+          <span class="touch-glyph">▲</span>
+          <span class="touch-label">二段跳</span>
+        </button>
+      </div>
+    </section>
+
     <!-- Interactive Controls & REA Inspector Bar -->
     <footer class="hud-bottom">
       <div class="controls-guide">
@@ -142,6 +175,7 @@
         <button type="button" class="action-btn btn-stage" id="btnStage2">第 2 關</button>
         <button type="button" class="action-btn btn-stage" id="btnStage3">第 3 關</button>
         <button type="button" class="action-btn btn-audio" id="btnToggleAudio">🔊 音效: 開</button>
+        <button type="button" class="action-btn btn-gamepad" id="btnToggleGamepad" title="顯示或隱藏畫面觸控手把">📱 觸控手把</button>
       </div>
     </footer>
   </div>

@@ -643,4 +643,420 @@ kbd {
 
 .btn-warp {
   background: linear-gradient(135deg, #3a0ca3, #4361ee);
+  border-color: #4cc9f0;
 }
+
+.btn-gamepad {
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  border-color: #a8dadc;
+}
+
+/* ==========================================================================
+   Mobile & Touch Gamepad (Supports Both Portrait & Landscape Orientations)
+   ========================================================================== */
+.mobile-gamepad {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(11, 16, 32, 0.92);
+  border: 1.5px solid rgba(255, 168, 44, 0.42);
+  border-radius: 16px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body.show-gamepad .mobile-gamepad {
+  display: flex;
+}
+
+@media (max-width: 1024px), (max-height: 620px), (pointer: coarse) {
+  .mobile-gamepad {
+    display: flex;
+  }
+}
+
+.touch-dpad,
+.touch-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  touch-action: none;
+}
+
+.touch-center-hint {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.touch-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 66px;
+  height: 66px;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.32);
+  background: radial-gradient(circle at 35% 30%, rgba(44, 62, 110, 0.95), rgba(14, 21, 42, 0.96));
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.06s ease, box-shadow 0.06s ease, filter 0.06s ease;
+}
+
+.touch-btn:active,
+.touch-btn.pressed {
+  transform: scale(0.92) translateY(2px);
+  filter: brightness(1.3);
+}
+
+.touch-dir {
+  width: 72px;
+  height: 66px;
+  border-color: rgba(255, 168, 44, 0.65);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 123, 28, 0.38), rgba(20, 28, 54, 0.95));
+}
+
+.touch-dir.pressed {
+  border-color: #ffd43b;
+  box-shadow: 0 0 18px rgba(255, 212, 59, 0.85);
+}
+
+.touch-jump {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border-color: #38ef7d;
+  background: radial-gradient(circle at 35% 30%, rgba(56, 239, 125, 0.45), rgba(12, 48, 36, 0.95));
+  box-shadow: 0 0 14px rgba(56, 239, 125, 0.4);
+}
+
+.touch-jump.pressed {
+  box-shadow: 0 0 24px rgba(56, 239, 125, 0.95);
+}
+
+.touch-rasengan {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border-color: #2de2ff;
+  background: radial-gradient(circle at 35% 30%, rgba(45, 226, 255, 0.52), rgba(8, 38, 72, 0.95));
+  box-shadow: 0 0 14px rgba(45, 226, 255, 0.45);
+}
+
+.touch-rasengan.pressed {
+  box-shadow: 0 0 24px rgba(45, 226, 255, 0.95);
+}
+
+.touch-bijuudama {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border-color: #ffd43b;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 0, 110, 0.62), rgba(74, 14, 120, 0.96));
+  box-shadow: 0 0 16px rgba(185, 76, 255, 0.65);
+}
+
+.touch-bijuudama.pressed {
+  box-shadow: 0 0 26px rgba(255, 212, 59, 0.98);
+}
+
+.touch-glyph {
+  font-size: 23px;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.touch-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #f1f5ff;
+  text-shadow: 0 1px 2px #000;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   1. MOBILE PORTRAIT ORIENTATION (手機直向 / 縱向模式)
+   ========================================================================== */
+@media (max-width: 920px) and (orientation: portrait) {
+  body {
+    justify-content: flex-start;
+    overflow-y: auto;
+    min-height: 100dvh;
+  }
+
+  .app-shell {
+    width: 98vw;
+    min-height: 100dvh;
+    padding: 6px 2px 10px;
+    gap: 6px;
+    justify-content: space-between;
+  }
+
+  .hud-top {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .hud-card {
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
+
+  .avatar-ring {
+    width: 50px;
+    height: 50px;
+  }
+
+  .abilities-card {
+    gap: 8px;
+  }
+
+  .ability-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .ability-name {
+    font-size: 11.5px;
+  }
+
+  .ability-state {
+    font-size: 10.5px;
+  }
+
+  .stage-subinfo {
+    display: none;
+  }
+
+  .viewport-wrap {
+    aspect-ratio: 820 / 660;
+    max-height: 46dvh;
+    border-radius: 12px;
+  }
+
+  .center-banner {
+    width: 92%;
+    padding: 14px 16px;
+  }
+
+  .banner-title {
+    font-size: 20px;
+  }
+
+  .banner-desc {
+    font-size: 12px;
+  }
+
+  .mobile-gamepad {
+    display: flex;
+    padding: 10px 10px;
+    border-radius: 14px;
+  }
+
+  .touch-center-hint {
+    display: none;
+  }
+
+  .touch-dpad,
+  .touch-actions {
+    gap: 8px;
+  }
+
+  .touch-dir {
+    width: 66px;
+    height: 64px;
+  }
+
+  .touch-jump,
+  .touch-rasengan,
+  .touch-bijuudama {
+    width: 62px;
+    height: 62px;
+  }
+
+  .hud-bottom {
+    flex-direction: column;
+    padding: 6px 8px;
+    gap: 6px;
+  }
+
+  .controls-guide {
+    display: none;
+  }
+
+  .quick-actions {
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .action-btn {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+}
+
+/* ==========================================================================
+   2. MOBILE LANDSCAPE ORIENTATION (手機橫向全螢幕操控模式)
+   ========================================================================== */
+@media (max-width: 1024px) and (orientation: landscape), (max-height: 560px) and (orientation: landscape) {
+  body {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .app-shell {
+    width: 99vw;
+    height: 100dvh;
+    padding: 3px 4px;
+    gap: 3px;
+    justify-content: space-between;
+  }
+
+  .hud-top {
+    grid-template-columns: 215px 1.35fr 0.85fr;
+    gap: 5px;
+  }
+
+  .hud-card {
+    padding: 3px 8px;
+    border-radius: 8px;
+  }
+
+  .avatar-ring {
+    width: 38px;
+    height: 38px;
+  }
+
+  .badge-tag {
+    font-size: 10.5px;
+    padding: 1px 6px;
+  }
+
+  .lives-tag {
+    font-size: 11px;
+  }
+
+  .player-hp-track {
+    height: 12px;
+  }
+
+  .player-hp-text {
+    font-size: 9.5px;
+  }
+
+  .stat-row {
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .ability-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+
+  .ability-name {
+    font-size: 10.5px;
+  }
+
+  .ability-state {
+    font-size: 9.5px;
+  }
+
+  .stage-header {
+    font-size: 10.5px;
+  }
+
+  .stage-timer {
+    font-size: 9.5px;
+  }
+
+  .stage-subinfo {
+    display: none;
+  }
+
+  .viewport-wrap {
+    flex: 1;
+    min-height: 0;
+    max-height: calc(100dvh - 82px);
+    border-radius: 10px;
+  }
+
+  /* Floating Semi-Transparent Overlay Touch Controls in Landscape Mode */
+  .mobile-gamepad {
+    display: flex;
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: 36px;
+    z-index: 35;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    pointer-events: none;
+  }
+
+  .touch-center-hint {
+    display: none;
+  }
+
+  .touch-dpad,
+  .touch-actions {
+    pointer-events: auto;
+    gap: 10px;
+  }
+
+  .touch-btn {
+    opacity: 0.84;
+    backdrop-filter: blur(6px);
+  }
+
+  .touch-dir {
+    width: 64px;
+    height: 58px;
+  }
+
+  .touch-jump,
+  .touch-rasengan,
+  .touch-bijuudama {
+    width: 60px;
+    height: 60px;
+  }
+
+  .hud-bottom {
+    padding: 2px 8px;
+    border-radius: 8px;
+    justify-content: center;
+  }
+
+  .controls-guide {
+    display: none;
+  }
+
+  .quick-actions {
+    gap: 4px;
+    justify-content: center;
+  }
+
+  .action-btn {
+    font-size: 10px;
+    padding: 3px 7px;
+  }
+}
+
